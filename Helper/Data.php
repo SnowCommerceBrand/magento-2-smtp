@@ -23,6 +23,7 @@ namespace Mageplaza\Smtp\Helper;
 
 use Magento\Store\Model\ScopeInterface;
 use Mageplaza\Core\Helper\AbstractData;
+use Magento\Framework\Encryption\EncryptorInterface;
 
 /**
  * Class Data
@@ -30,6 +31,13 @@ use Mageplaza\Core\Helper\AbstractData;
  */
 class Data extends AbstractData
 {
+    public function __construct(
+        EncryptorInterface $encryptor
+    )
+    {
+        $this->encryptor = $encryptor;
+    }
+
     const CONFIG_MODULE_PATH = 'smtp';
     const CONFIG_GROUP_SMTP  = 'configuration_option';
     const DEVELOP_GROUP_SMTP = 'developer';
@@ -63,22 +71,15 @@ class Data extends AbstractData
      * @param bool $decrypt
      * @return array|mixed|string
      */
-    public function getPassword($storeId = null, $decrypt = true)
-    {
-        if ($storeId || $storeId = $this->_request->getParam('store')) {
-            $password = $this->getSmtpConfig('password', $storeId);
-        } else if ($websiteCode = $this->_request->getParam('website')) {
-            $passwordPath = self::CONFIG_MODULE_PATH . '/' . self::CONFIG_GROUP_SMTP . '/password';
-            $password     = $this->getConfigValue($passwordPath, $websiteCode, ScopeInterface::SCOPE_WEBSITE);
-        } else {
-            $password = $this->getSmtpConfig('password');
+    public function getPassword($storeId = null, $decrypt = true){
+        if($storeId != null){
+            $password = $this->getSmtpConfig('', $storeId);
+        }else{
+            $password = $this->getSmtpConfig('');
         }
 
         if ($decrypt) {
-            /** @var \Magento\Framework\Encryption\EncryptorInterface $encryptor */
-            $encryptor = $this->getObject(\Magento\Framework\Encryption\EncryptorInterface::class);
-
-            return $encryptor->decrypt($password);
+            return $this->encryptor->decrypt($password);
         }
 
         return $password;
