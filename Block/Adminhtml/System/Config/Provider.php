@@ -254,6 +254,12 @@ class Provider extends Field
                 'port'     => '465',
                 'protocol' => 'ssl'
             ],
+            [
+                'label'    => __('Campaign Monitor'),
+                'host'     => 'smtp.api.createsend.com',
+                'port'     => '587',
+                'protocol' => 'tls'
+            ],
         ];
 
         return $options;
